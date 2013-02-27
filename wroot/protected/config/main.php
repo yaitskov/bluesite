@@ -2,12 +2,13 @@
 
 // uncomment the following to define a path alias
 // Yii::setPathOfAlias('local','path/to/local-folder');
+$params = parse_ini_file("/etc/bluesite.ini");
 
 // This is the main Web application configuration. Any writable
 // CWebApplication properties can be configured here.
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
-	'name'=>'Yii Blog Demo',
+	'name'=> $params['sitename'],
 
 	// preloading 'log' component
 	'preload'=>array('log'),
@@ -26,21 +27,15 @@ return array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
 		),
-		'db'=>array(
-			'connectionString' => 'sqlite:protected/data/blog.db',
-			'tablePrefix' => 'tbl_',
-		),
 		// uncomment the following to use a MySQL database
-		/*
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=blog',
+			'connectionString' => 'mysql:host=localhost;dbname=blue',
 			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
+			'username' => $params['dbuser'],
+			'password' => $params['dbpass'],
 			'charset' => 'utf8',
 			'tablePrefix' => 'tbl_',
 		),
-		*/
 		'errorHandler'=>array(
 			// use 'site/error' action to display errors
 			'errorAction'=>'site/error',
