@@ -1,1 +1,3 @@
 *.pem
+wroot/assets/*
+wroot/protected/runtime/*
