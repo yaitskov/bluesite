@@ -14,6 +14,7 @@ class Project extends CActiveRecord
 	 * @var string $description  project description like readme 
 	 * @var string $status       it can be used for marking deleted projects
 	 * @var integer $created     for garba collection
+     * @var integer $nfollowers  number people who follows this project
 	 */
 
     const NEWPRO = 'ne';
@@ -49,7 +50,8 @@ class Project extends CActiveRecord
             // dl - marked deleted
 			array('status', 'in', 'range'=>array(self::NEWPRO, self::DELETED)),
 			array('prname', 'length', 'max'=>128),
-            array('owner_id', 'numerical', 'integerOnly' => true),
+            array('nfollowers', 'number', 'min' => 0),
+            array('owner_id, nfollowers', 'numerical', 'integerOnly' => true),
 			array('description', 'safe'),
 		);
 	}
@@ -63,8 +65,25 @@ class Project extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			'owner' => array(self::BELONGS_TO, 'User', 'owner_id'),
+            'interestedUsers' => array(self::MANY_MANY, 'User', 'tbl_follower_project(project_id,follower_id)'),
 		);
 	}
+
+    private $cacheFollow = null;
+
+    public function canFollow($uid) {
+        return $this->owner_id != $uid;
+    }
+    
+    public function doesFollow($uid) {
+        /* if ($this->cacheFollow !== null) { */
+        /*     return $this->cacheFollow; */
+        /* } */
+        $this->cacheFollow = FollowerProject::model()->exists(
+            'follower_id = :uid and project_id = :prj',
+            array(':uid' => $uid, ':prj' => $this->id));
+        return $this->cacheFollow;
+    }    
 
 	/**
 	 * @return array customized attribute labels (name=>label)
@@ -78,6 +97,7 @@ class Project extends CActiveRecord
 			'status' => 'Status',
 			'created' => 'Create Time',
 			'owner_id' => 'Owner',
+            'nfollowers' => 'Number followers',
 		);
 	}
 

@@ -30,7 +30,8 @@
 	<div id="mainmenu">
 		<?php $this->widget('zii.widgets.CMenu',array(
 			'items'=>array(
-				array('label'=>'Home', 'url'=>array('project/index')),
+				array('label'=>'Popular', 'url'=>array('project/index')),
+				array('label'=>'Newest', 'url'=>array('project/newest')),                
 				array('label'=>'My projects',
                     'url'=>array('project/myProjects'),
                     'visible'=>!Yii::app()->user->isGuest),

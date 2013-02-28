@@ -1,0 +1,1 @@
+alter table tbl_project add column nfollowers integer default 0;

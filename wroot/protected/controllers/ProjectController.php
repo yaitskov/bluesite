@@ -28,11 +28,11 @@ class ProjectController extends Controller
 	{
 		return array(
 			array('allow',  // allow all users to access 'index' and 'view' actions.
-				'actions'=>array('index','view'),
+				'actions'=>array('index','view', 'newest', 'popular'),
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated users to access all actions
-                'actions' => array('myProjects', 'create', 'update', 'delete'),
+                'actions' => array('myProjects', 'create', 'update', 'delete', 'follow', 'forget'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -139,7 +139,10 @@ class ProjectController extends Controller
 	 */
 	public function actionIndex()
 	{
-        // newest
+        $this->actionPopular();
+	}
+
+    public function actionNewest() {
 		$criteria=new CDbCriteria(array(
 			'condition'=>'status = :st and length(prname) > 3 and length(description) > 100',
             'params' => array(':st' => Project::NEWPRO),
@@ -153,10 +156,58 @@ class ProjectController extends Controller
 			'criteria'=>$criteria,
 		));
 
-		$this->render('index',array(
+		$this->render('newest',array(
 			'dataProvider'=>$dataProvider,
+		));        
+    }
+
+    public function actionFollow($id) {
+        $ticket = FollowerProject::model()->findByAttributes(
+            array(
+                'follower_id' => Yii::app()->user->id,
+                'project_id' => $id));
+        if (!$ticket) {
+            $ticket = new FollowerProject;
+            $ticket->follower_id = Yii::app()->user->id;
+            $ticket->project_id = $id;
+            $ticket->created = time();
+            $ticket->save();                
+        }
+        $this->redirect(array('view','id'=>$id));        
+        
+    }
+
+    public function actionForget($id) {
+        $ticket = FollowerProject::model()->findByAttributes(
+            array(
+                'follower_id' => Yii::app()->user->id,
+                'project_id' => $id));
+        if ($ticket) {
+            $ticket->delete();
+        }
+        $this->redirect(array('view','id'=>$id));        
+    }
+
+
+    public function actionPopular() {
+        // need join table
+		$criteria=new CDbCriteria(array(
+			'condition'=>'status = :st',
+            'params' => array(':st' => Project::NEWPRO),
+			'order'=>'nfollowers/(1 + UNIX_TIMESTAMP(now()) - created) DESC'
 		));
-	}
+
+		$dataProvider=new CActiveDataProvider('Project', array(
+			'pagination'=>array(
+				'pageSize'=>Yii::app()->params['projectsPerPage'],
+			),
+			'criteria'=>$criteria,
+		));
+
+		$this->render('popular',array(
+			'dataProvider'=>$dataProvider,
+		));                
+    }
 
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.

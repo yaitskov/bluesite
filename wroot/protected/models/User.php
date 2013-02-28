@@ -77,8 +77,8 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'projects' => array(self::HAS_MANY, 'Project', 'owner_id'),            
-			'posts' => array(self::HAS_MANY, 'Post', 'author_id'),
+			'myProjects' => array(self::HAS_MANY, 'Project', 'owner_id'),
+            'trackingProjects' => array(self::MANY_MANY, 'Project', 'tbl_follower_project(follower_id, project_id)'),
 		);
 	}
 
