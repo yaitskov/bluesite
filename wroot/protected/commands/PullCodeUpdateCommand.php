@@ -27,11 +27,12 @@ class PullCodeUpdateCommand extends CConsoleCommand {
 
     protected function filterAndSortPatches($version) {
         echo "current database version $version\n";
-        $pattern = dirname(__FILE__).'/data/updates/*.sql';
+        $pattern = dirname(dirname(__FILE__)).'/data/updates/*.sql';
         $files = glob($pattern);
         $toBeApplied = array_filter($files,
-            function ($path) use($version) {               
-                return  $this->getPatchId($path) > $version;
+            function ($path) use($version) {
+                $id = $this->getPatchId($path);
+                return $id > $version;
             });
         
         usort($toBeApplied, function($a, $b) { // by desc
@@ -45,10 +46,10 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         return $toBeApplied;
     }
 
-    protected function applyPatches($toBeApplied) {
+    protected function applyPatches($toBeApplied, $meta) {
         $connection = Yii::app()->db;
         foreach ($toBeApplied as $patch) {
-            $sqls = file_get_contents($sqlFile);
+            $sqls = file_get_contents($patch);
             echo "body of $patch is got\n";
             foreach(explode(';',$sqls) as $sql)
             {  //todo: i don't know how check that sql was applied without errors.
@@ -73,7 +74,7 @@ class PullCodeUpdateCommand extends CConsoleCommand {
             $dumper = new DumpDbCommand('dumper', new CConsoleCommandRunner()); 
             $fullname =  preg_replace('/.sql$/', '-before-update.sql', $dumper->getPathToFile());
             $dumper->dump($fullname);
-            $this->applyPatches($toBeApplied);
+            $this->applyPatches($toBeApplied, $meta);
         }
     }
 }
