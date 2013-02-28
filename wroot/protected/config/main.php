@@ -67,5 +67,7 @@ return array(
 
 	// application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']
-	'params'=>require(dirname(__FILE__).'/params.php'),
+	'params'=>array_merge(
+        require(dirname(__FILE__).'/params.php'),
+        $params)
 );

@@ -2,6 +2,8 @@
 
 // this contains the application parameters that can be maintained via GUI
 return array(
+    // max number db backups. if a backup is created each night and the value is 3 then 3 files will
+    'numbackups' => 3,
 	// this is displayed in the header section
 	'title'=>'My Yii Blog',
 	// this is used in error pages
