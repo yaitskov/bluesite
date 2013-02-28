@@ -57,13 +57,35 @@ class SiteController extends Controller
 		$this->render('contact',array('model'=>$model));
 	}
 
+    /**
+     * Form for registration new user.
+     */
+    public function actionRegister() {
+        $model=new User;
+		// collect user input data
+		if(isset($_POST['User']))
+		{
+			$model->attributes=$_POST['User'];
+            $model->pro_type = User::TRIAL;
+			// validate user input and redirect to the previous page if valid
+			if($model->validate()) {
+                if ($model->save()) {
+                    $this->redirect(Yii::app()->createUrl('site/login'));
+                }
+            }
+		}
+		// display the register form
+		$this->render('register',array('model'=>$model));        
+    }
+
 	/**
 	 * Displays the login page
 	 */
 	public function actionLogin()
 	{
 		if (!defined('CRYPT_BLOWFISH')||!CRYPT_BLOWFISH)
-			throw new CHttpException(500,"This application requires that PHP was compiled with Blowfish support for crypt().");
+			throw new CHttpException(500,
+                "This application requires that PHP was compiled with Blowfish support for crypt().");
 
 		$model=new LoginForm;
 

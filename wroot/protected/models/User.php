@@ -5,16 +5,20 @@
  */
 class User extends CActiveRecord
 {
+    public $passwordRepeat;
 	/**
 	 * The followings are the available columns in table 'tbl_profile':
 	 * @var integer $id
-     * @var string $proType
+     * @var string $pro_type
 	 * @var string $username
 	 * @var string $password
 	 * @var string $email
 	 * @var string $description
+     * @var string $passwordRepeat only for registration
 	 */
 
+    const TRIAL = 'tri';
+    
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return CActiveRecord the static model class
@@ -32,6 +36,16 @@ class User extends CActiveRecord
 		return '{{profile}}';
 	}
 
+    protected function beforeSave() {
+        if (!parent::beforeSave()) {
+            return false;
+        }
+        if ($this->isNewRecord) {
+            $this->password = $this->hashPassword($this->password);
+        }
+        return true;
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -41,12 +55,19 @@ class User extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			array('username, password, email, pro_type', 'required'),
-			array('username, password, email', 'length', 'max'=>128),
+            array('email', 'email'),
+            array('email', 'unique', 'attributeName' => 'email', 'className' => 'User'),
+            array('username', 'unique', 'attributeName' => 'username', 'className' => 'User'),            
+            array('passwordRepeat', 'required', 'on' => 'insert'),
+            array('passwordRepeat', 'compare', 'compareAttribute' => 'password',
+            'on' => 'insert'),
+			array('description', 'length', 'max'=>100000),
+            array('username, password, email', 'length', 'max'=>128),
+            array('password', 'length', 'min' => 3),
             // specifies profile capabilities. There will be trial, junior etc.
-            array('pro_type', 'in', 'range'=>array('tri')),
-			array('description', 'safe'),
+            array('pro_type', 'in', 'range'=>array('tri'))
 		);
-	}
+	}    
 
 	/**
 	 * @return array relational rules.
@@ -56,6 +77,7 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			'projects' => array(self::HAS_MANY, 'Project', 'owner_id'),            
 			'posts' => array(self::HAS_MANY, 'Post', 'author_id'),
 		);
 	}
@@ -69,8 +91,10 @@ class User extends CActiveRecord
 			'id' => 'Id',
 			'username' => 'Username',
 			'password' => 'Password',
+			'passwordRepeat' => 'Password confirmation',
 			'email' => 'Email',
-			'profile' => 'Profile',
+			'pro_type' => 'Profile Type',
+			'description' => 'Description',            
 		);
 	}
 
