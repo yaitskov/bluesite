@@ -2,6 +2,10 @@
 
 // this contains the application parameters that can be maintained via GUI
 return array(
+    // git branch to pull
+    'pull-branch' => 'master',
+    // git remote repository to pull
+    'pull-repo' => 'hub',    
     // max number db backups. if a backup is created each night and the value is 3 then 3 files will
     'numbackups' => 3,
     //
