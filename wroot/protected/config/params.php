@@ -10,6 +10,10 @@ return array(
     'numbackups' => 3,
     //
     'backup-folder' => '/tmp/bluebackup',
+	// number of projects displayed per page
+	'projectsPerPage'=>10,
+    //
+    'company' => 'Horns and Hoofs',
 	// this is displayed in the header section
 	'title'=>'My Yii Blog',
 	// this is used in error pages

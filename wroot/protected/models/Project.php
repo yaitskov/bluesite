@@ -16,6 +16,9 @@ class Project extends CActiveRecord
 	 * @var integer $created     for garba collection
 	 */
 
+    const NEWPRO = 'ne';
+    const DELETED = 'de';
+    
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return CActiveRecord the static model class
@@ -44,7 +47,7 @@ class Project extends CActiveRecord
 			array('prname, owner_id, status, created', 'required'),
             // ne - new
             // dl - marked deleted
-			array('status', 'in', 'range'=>array('ne', 'dl')),
+			array('status', 'in', 'range'=>array(self::NEWPRO, self::DELETED)),
 			array('prname', 'length', 'max'=>128),
             array('owner_id', 'numerical', 'integerOnly' => true),
 			array('description', 'safe'),
@@ -59,9 +62,7 @@ class Project extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'author' => array(self::BELONGS_TO, 'User', 'author_id'),
-			'comments' => array(self::HAS_MANY, 'Comment', 'post_id', 'condition'=>'comments.status='.Comment::STATUS_APPROVED, 'order'=>'comments.create_time DESC'),
-			'commentCount' => array(self::STAT, 'Comment', 'post_id', 'condition'=>'status='.Comment::STATUS_APPROVED),
+			'owner' => array(self::BELONGS_TO, 'User', 'owner_id'),
 		);
 	}
 
@@ -72,13 +73,11 @@ class Project extends CActiveRecord
 	{
 		return array(
 			'id' => 'Id',
-			'title' => 'Title',
-			'content' => 'Content',
-			'tags' => 'Tags',
+			'prname' => 'Name',
+			'description' => 'Description',
 			'status' => 'Status',
-			'create_time' => 'Create Time',
-			'update_time' => 'Update Time',
-			'author_id' => 'Author',
+			'created' => 'Create Time',
+			'owner_id' => 'Owner',
 		);
 	}
 
@@ -87,84 +86,10 @@ class Project extends CActiveRecord
 	 */
 	public function getUrl()
 	{
-		return Yii::app()->createUrl('post/view', array(
+		return Yii::app()->createUrl('project/view', array(
 			'id'=>$this->id,
-			'title'=>$this->title,
+			'title'=>$this->prname,
 		));
-	}
-
-	/**
-	 * @return array a list of links that point to the post list filtered by every tag of this post
-	 */
-	public function getTagLinks()
-	{
-		$links=array();
-		foreach(Tag::string2array($this->tags) as $tag)
-			$links[]=CHtml::link(CHtml::encode($tag), array('post/index', 'tag'=>$tag));
-		return $links;
-	}
-
-	/**
-	 * Normalizes the user-entered tags.
-	 */
-	public function normalizeTags($attribute,$params)
-	{
-		$this->tags=Tag::array2string(array_unique(Tag::string2array($this->tags)));
-	}
-
-	/**
-	 * Adds a new comment to this post.
-	 * This method will set status and post_id of the comment accordingly.
-	 * @param Comment the comment to be added
-	 * @return boolean whether the comment is saved successfully
-	 */
-	public function addComment($comment)
-	{
-		if(Yii::app()->params['commentNeedApproval'])
-			$comment->status=Comment::STATUS_PENDING;
-		else
-			$comment->status=Comment::STATUS_APPROVED;
-		$comment->post_id=$this->id;
-		return $comment->save();
-	}
-
-	/**
-	 * This is invoked when a record is populated with data from a find() call.
-	 */
-	protected function afterFind()
-	{
-		parent::afterFind();
-		$this->_oldTags=$this->tags;
-	}
-
-	/**
-	 * This is invoked before the record is saved.
-	 * @return boolean whether the record should be saved.
-	 */
-	protected function beforeSave()
-	{
-		if(parent::beforeSave())
-		{
-			if($this->isNewRecord)
-			{
-				$this->create_time=$this->update_time=time();
-				$this->author_id=Yii::app()->user->id;
-			}
-			else
-				$this->update_time=time();
-			return true;
-		}
-		else
-			return false;
-	}
-
-	/**
-	 * This is invoked after the record is saved.
-	 */
-	protected function afterSave()
-	{
-		parent::afterSave();
-		Tag::model()->updateFrequency($this->_oldTags, $this->tags);
 	}
 
 	/**
@@ -174,7 +99,6 @@ class Project extends CActiveRecord
 	{
 		parent::afterDelete();
 		Comment::model()->deleteAll('post_id='.$this->id);
-		Tag::model()->updateFrequency($this->tags, '');
 	}
 
 	/**
@@ -196,4 +120,12 @@ class Project extends CActiveRecord
 			),
 		));
 	}
+
+    public function canChange($uid) {
+        return $this->owner_id === $uid;
+    }
+
+    public static function canCreate($user) {
+        return !$user->isGuest;
+    }
 }

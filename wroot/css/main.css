@@ -47,23 +47,28 @@ body
 	font-size: 200%;
 }
 
-#mainmenu
+#mainmenu, .secondmenu
 {
 	background:white url(bg.gif) repeat-x left top;
 }
 
-#mainmenu ul
+.secondmenu {
+    margin-bottom: 10px;
+}
+
+#mainmenu ul, .secondmenu ul
 {
 	padding:6px 20px 5px 20px;
 	margin:0px;
 }
 
-#mainmenu ul li
+#mainmenu ul li, .secondmenu ul li
 {
 	display: inline;
 }
 
-#mainmenu ul li a
+
+#mainmenu ul li a, .secondmenu ul li a
 {
 	color:#ffffff;
 	background-color:transparent;
