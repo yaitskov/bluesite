@@ -139,15 +139,16 @@ class ProjectController extends Controller
 	 */
 	public function actionIndex()
 	{
+        // newest
 		$criteria=new CDbCriteria(array(
-			'condition'=>'status='.Post::STATUS_PUBLISHED,
-			'order'=>'update_time DESC',
-			'with'=>'commentCount',
+			'condition'=>'status = :st and length(prname) > 3 and length(description) > 100',
+            'params' => array(':st' => Project::NEWPRO),
+			'order'=>'created DESC'
 		));
 
-		$dataProvider=new CActiveDataProvider('Post', array(
+		$dataProvider=new CActiveDataProvider('Project', array(
 			'pagination'=>array(
-				'pageSize'=>Yii::app()->params['postsPerPage'],
+				'pageSize'=>Yii::app()->params['projectsPerPage'],
 			),
 			'criteria'=>$criteria,
 		));

@@ -19,7 +19,7 @@ return array(
 		'application.components.*',
 	),
 
-	'defaultController'=>'post',
+	'defaultController' => 'project',
 
 	// application components
 	'components'=>array(
