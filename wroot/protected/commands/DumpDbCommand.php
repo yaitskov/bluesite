@@ -36,7 +36,8 @@ class DumpDbCommand extends CConsoleCommand {
             Yii::app()->params['dbuser'] . ' -p' .
             Yii::app()->params['dbpass'] . ' blue > ' . $fullname;
         echo "execute: '$cmd'\n";
-        $result = shell_exec($cmd);// . $fullname);
+        ExtProcess::run($cmd);
+        //$result = shell_exec($cmd);// . $fullname);
         // null even if it's okay. exit code is hard to get.
         // if ($result === null) {
         /*     throw new Exception("failed to create the archive"); */

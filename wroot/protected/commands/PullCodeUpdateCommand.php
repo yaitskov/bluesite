@@ -16,9 +16,9 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         $repo = Yii::app()->params['pull-repo'];
         $branch = Yii::app()->params['pull-branch'];
         echo "root $root\n";
-        $cmd = "pushd $root ; git pull $repo $branch; popd ; ";
+        $cmd = "pushd $root || exit 1; git pull $repo $branch || exit 2 ; popd || exit 3; ";
         echo "execute: $cmd\n";
-        shell_exec($cmd);
+        ExtProcess::run($cmd);
     }
 
     protected function getPatchId($path) {
@@ -37,7 +37,11 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         usort($toBeApplied, function($a, $b) { // by desc
                 return $this->getPatchId($a) > $this->getPatchId($b);
             });
-        echo "applies patches " . CVarDumper::dumpAsString($toBeApplied) . "\n";
+        if ($toBeApplied) {
+            echo "applies patches " . join($toBeApplied, ", ") . "\n";
+        } else {
+            echo "nothing to apply\n";
+        }
         return $toBeApplied;
     }
 
@@ -45,6 +49,7 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         $connection = Yii::app()->db;
         foreach ($toBeApplied as $patch) {
             $sqls = file_get_contents($sqlFile);
+            echo "body of $patch is got\n";
             foreach(explode(';',$sqls) as $sql)
             {  //todo: i don't know how check that sql was applied without errors.
                 if(trim($sql)!=='') {
@@ -60,11 +65,10 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         }        
     }
     
-    
     protected function applySqlUpdates() {
         $meta = Meta::model()->find(); // current version
         $version = $meta->schema_version;
-        $toBeApplied = $this->filterAndSortPatched($version);
+        $toBeApplied = $this->filterAndSortPatches($version);
         $this->applyPatches($toBeApplied);
     }
 }
