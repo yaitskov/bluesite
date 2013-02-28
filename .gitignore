@@ -1,4 +1,4 @@
 *.pem
 *.pub
-#wroot/assets/*
-#wroot/protected/runtime/*
+wroot/assets/*
+wroot/protected/runtime/*
