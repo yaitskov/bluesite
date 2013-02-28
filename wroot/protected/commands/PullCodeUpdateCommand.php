@@ -5,7 +5,7 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         echo "Pulls commits from gitlab and checkout them\nand applies SQL update scripts\n";
     }
 
-    public function run($args) {
+    public function run($args) {        
         $this->pullCommits();
         $this->applySqlUpdates();
     }
@@ -29,7 +29,7 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         echo "current database version $version\n";
         $pattern = dirname(dirname(__FILE__)).'/data/updates/*.sql';
         $files = glob($pattern);
-	$ci = $this;
+        $ci = $this;
         $toBeApplied = array_filter($files,
             function ($path) use($version, $ci) {
                 $id = $ci->getPatchId($path);
@@ -47,30 +47,34 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         return $toBeApplied;
     }
 
+    /**
+     * @param string $patch path to sql patch file
+     */
+    protected function applyPatch($connection, $patch) {
+        $sqls = file_get_contents($patch);
+        echo "body of $patch is got\n";
+        foreach(explode(';',$sqls) as $sql)
+        {  //todo: i don't know how check that sql was applied without errors.
+            if(trim($sql)!=='') {
+                $connection->createCommand($sql)->execute();                    
+            }
+        }  // there is flag required for marking schema as damaged and there is required human intervention
+    }
+    
     protected function applyPatches($toBeApplied, $meta) {
         $connection = Yii::app()->db;
         foreach ($toBeApplied as $patch) {
-            $sqls = file_get_contents($patch);
-            echo "body of $patch is got\n";
-            foreach(explode(';',$sqls) as $sql)
-            {  //todo: i don't know how check that sql was applied without errors.
-                if(trim($sql)!=='') {
-                    $connection->createCommand($sql)->execute();                    
-                }
-            }  // there is flag required for marking schema as damaged and there is required human intervention
+            $meta->unconsistent();
+            $this->applyPatch($connection, $patch);
             echo "patch $patch is ok\n";
-            $meta->schema_version = $this->getPatchId($patch);
-            if (!$meta->save()) {
-                throw new Exception("failed to update schema version upto "
-                    . $meta->schema_version);
-            }
+            $meta->consistent($this->getPatchId($patch));            
         }        
     }
     
     protected function applySqlUpdates() {
         $meta = Meta::model()->find(); // current version
-        $version = $meta->schema_version;
-        $toBeApplied = $this->filterAndSortPatches($version);
+        $meta->checkConsistency();
+        $toBeApplied = $this->filterAndSortPatches($meta->schema_version);
         if ($toBeApplied) {
             $dumper = new DumpDbCommand('dumper', new CConsoleCommandRunner()); 
             $fullname =  preg_replace('/.sql$/', '-before-update.sql', $dumper->getPathToFile());
