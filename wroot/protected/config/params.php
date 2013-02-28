@@ -4,6 +4,8 @@
 return array(
     // max number db backups. if a backup is created each night and the value is 3 then 3 files will
     'numbackups' => 3,
+    //
+    'backup-folder' => '/tmp/bluebackup',
 	// this is displayed in the header section
 	'title'=>'My Yii Blog',
 	// this is used in error pages
