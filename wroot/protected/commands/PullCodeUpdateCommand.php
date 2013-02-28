@@ -69,7 +69,12 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         $meta = Meta::model()->find(); // current version
         $version = $meta->schema_version;
         $toBeApplied = $this->filterAndSortPatches($version);
-        $this->applyPatches($toBeApplied);
+        if ($toBeApplied) {
+            $dumper = new DumpDbCommand('dumper', new CConsoleCommandRunner()); 
+            $fullname =  preg_replace('/.sql$/', '-before-update.sql', $dumper->getPathToFile());
+            $dumper->dump($fullname);
+            $this->applyPatches($toBeApplied);
+        }
     }
 }
 

@@ -10,7 +10,7 @@ class DumpDbCommand extends CConsoleCommand {
         echo "makes backup of db and puts it to folder '$f'\n";
     }
 
-    protected function getPathToFile() {
+    public function getPathToFile() {
         $backfolder = Yii::app()->params['backup-folder'];
         if (!file_exists($backfolder)) {
             if (mkdir($backfolder, 0777, true)) {
@@ -31,7 +31,7 @@ class DumpDbCommand extends CConsoleCommand {
         return $fullname;
     }
 
-    protected function dump($fullname) {
+    public function dump($fullname) {
         $cmd = "mysqldump -u " .
             Yii::app()->params['dbuser'] . ' -p' .
             Yii::app()->params['dbpass'] . ' blue > ' . $fullname;
