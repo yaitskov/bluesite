@@ -1,14 +1,18 @@
 <?php
 
+/**
+ * There is a profile.
+ */
 class User extends CActiveRecord
 {
 	/**
-	 * The followings are the available columns in table 'tbl_user':
+	 * The followings are the available columns in table 'tbl_profile':
 	 * @var integer $id
+     * @var string $proType
 	 * @var string $username
 	 * @var string $password
 	 * @var string $email
-	 * @var string $profile
+	 * @var string $description
 	 */
 
 	/**
@@ -25,7 +29,7 @@ class User extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return '{{user}}';
+		return '{{profile}}';
 	}
 
 	/**
@@ -36,9 +40,11 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('username, password, email', 'required'),
+			array('username, password, email, pro_type', 'required'),
 			array('username, password, email', 'length', 'max'=>128),
-			array('profile', 'safe'),
+            // specifies profile capabilities. There will be trial, junior etc.
+            array('pro_type', 'in', 'range'=>array('tri')),
+			array('description', 'safe'),
 		);
 	}
 

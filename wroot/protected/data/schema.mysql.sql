@@ -1,3 +1,32 @@
+CREATE TABLE tbl_profile
+(
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        -- holds last update file
+        schema_version integer NOT NULL,
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- user = profile 
+CREATE TABLE tbl_profile
+(
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        pro_type CHAR(3) NOT NULL,        
+	username VARCHAR(128) NOT NULL unique,
+	password VARCHAR(128) NOT NULL,
+	email VARCHAR(128) NOT NULL unique,	
+	description TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE tbl_project
+(
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	prname VARCHAR(128) NOT NULL,
+	owner_id integer NOT NULL references tbl_user(id) ON DELETE CASCADE,
+	description TEXT,
+	status char(2) NOT NULL,
+	created integer
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
 CREATE TABLE tbl_lookup
 (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -7,14 +36,6 @@ CREATE TABLE tbl_lookup
 	position INTEGER NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE tbl_user
-(
-	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	username VARCHAR(128) NOT NULL,
-	password VARCHAR(128) NOT NULL,
-	email VARCHAR(128) NOT NULL,
-	profile TEXT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE tbl_post
 (

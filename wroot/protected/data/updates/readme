@@ -1,0 +1,13 @@
+this folder holds sql updates of scheme and data.
+
+each update file name is ordinal number.
+It say in which order apply scripts to database.
+
+file init_update - holds version last applied to the current schema file
+                   if database is created from zero all updates with number more than that
+                   should be applied.
+
+
+column tbl_meta.schema_version holds last update file.
+
+
