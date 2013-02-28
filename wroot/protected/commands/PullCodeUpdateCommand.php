@@ -21,7 +21,7 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         ExtProcess::run($cmd);
     }
 
-    protected function getPatchId($path) {
+    public function getPatchId($path) {
         return  (int)preg_replace('/.sql$/', '', basename($path));
     }
 
@@ -29,14 +29,15 @@ class PullCodeUpdateCommand extends CConsoleCommand {
         echo "current database version $version\n";
         $pattern = dirname(dirname(__FILE__)).'/data/updates/*.sql';
         $files = glob($pattern);
+	$ci = $this;
         $toBeApplied = array_filter($files,
-            function ($path) use($version) {
-                $id = $this->getPatchId($path);
+            function ($path) use($version, $ci) {
+                $id = $ci->getPatchId($path);
                 return $id > $version;
             });
         
-        usort($toBeApplied, function($a, $b) { // by desc
-                return $this->getPatchId($a) > $this->getPatchId($b);
+        usort($toBeApplied, function($a, $b) use($ci) { // by desc
+                return $ci->getPatchId($a) > $ci->getPatchId($b);
             });
         if ($toBeApplied) {
             echo "applies patches " . join($toBeApplied, ", ") . "\n";
