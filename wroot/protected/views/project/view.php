@@ -40,9 +40,9 @@ $this->pageTitle=$model->prname;
 </div>
 
 <div id="comments">
-    <h3 id='nocomments' <? if($model->ncomments>0): ?>style='display: none;'<?php endif; ?>>No comments</h3>
-    <h3 id='onecomment' <? if($model->ncomments!=1): ?>style='display: none;'<?php endif; ?>>One comment</h3>
-    <h3 id='ncomments' <? if($model->ncomments<2): ?>style='display: none;'<?php endif; ?>>
+    <h3 id='nocomments' <?php if($model->ncomments>0): ?>style='display: none;'<?php endif; ?>>No comments</h3>
+    <h3 id='onecomment' <?php if($model->ncomments!=1): ?>style='display: none;'<?php endif; ?>>One comment</h3>
+    <h3 id='ncomments' <?php if($model->ncomments<2): ?>style='display: none;'<?php endif; ?>>
           <span class="numx"><?php echo $model->ncomments; ?></span> comments</h3>
     <div class="comment-bodies">
     <?php foreach($model->comments as $comment): ?>

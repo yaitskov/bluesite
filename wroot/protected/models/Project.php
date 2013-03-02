@@ -51,7 +51,7 @@ class Project extends CActiveRecord
 			array('status', 'in', 'range'=>array(self::NEWPRO, self::DELETED)),
 			array('prname', 'length', 'max'=>128),
             array('prname', 'filter', 'filter' => 'trim'),
-            array('nfollowers', 'number', 'min' => 0),
+            //            array('nfollowers', 'number', 'min' => 0),
             array('owner_id, nfollowers', 'numerical', 'integerOnly' => true),
 			array('description', 'safe'),
 		);
