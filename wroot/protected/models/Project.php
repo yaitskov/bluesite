@@ -50,6 +50,7 @@ class Project extends CActiveRecord
             // dl - marked deleted
 			array('status', 'in', 'range'=>array(self::NEWPRO, self::DELETED)),
 			array('prname', 'length', 'max'=>128),
+            array('prname', 'filter', 'filter' => 'trim'),
             array('nfollowers', 'number', 'min' => 0),
             array('owner_id, nfollowers', 'numerical', 'integerOnly' => true),
 			array('description', 'safe'),
@@ -65,6 +66,18 @@ class Project extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			'owner' => array(self::BELONGS_TO, 'User', 'owner_id'),
+			'comments' => array(self::HAS_MANY, 'Comment', 'obj_id',
+                'condition'=>'obj_type=:ot and (status = :sta or status = :stb)',
+                'params'   => array(':ot' => Comment::OT_PROJECT,
+                    ':sta' => Comment::ST_NEW, ':stb' => Comment::ST_VALID),
+                'order'    =>'created ASC'),
+            // try with?
+            'ncomments' => array(self::STAT, 'Comment', 'obj_id',
+                'condition'=>'obj_type = :ot and (status = :sta or status = :stb)',
+                'params'   => array(':ot' => Comment::OT_PROJECT,
+                    ':sta' => Comment::ST_NEW, ':stb' => Comment::ST_VALID),
+            ),
+            
             'interestedUsers' => array(self::MANY_MANY, 'User', 'tbl_follower_project(project_id,follower_id)'),
 		);
 	}
@@ -146,6 +159,10 @@ class Project extends CActiveRecord
     }
 
     public static function canCreate($user) {
+        return !$user->isGuest;
+    }
+
+    public function canComment($user) {
         return !$user->isGuest;
     }
 }

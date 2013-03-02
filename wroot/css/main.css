@@ -270,3 +270,26 @@ div.breadcrumbs span
 {
 	color:red;
 }
+
+
+#errbox {
+    left: 70%;
+    position: fixed;
+    top: 40px;
+    z-index: 100;
+    width: 24%;
+}
+
+.templates {
+    display: none;
+}
+
+.errmsg, .questionbox {
+    background-color: #EFFDFF;
+    border: 2px solid #298DCD;
+    border-radius: 10px 10px 10px 10px;
+    color: red;
+    cursor: pointer;
+    font-size: 13pt;
+    padding: 11px;
+}

@@ -60,5 +60,15 @@
 
 </div><!-- page -->
 
+<div id='errbox'></div>
+<div class='templates'>
+<div class='questionbox'>
+  <div class='questiontext'></div>
+  <div>
+      <a id='btnyes'>yes</a>
+      <a id='btnno'>no</a>
+  </div>
+</div>
+</div>
 </body>
 </html>

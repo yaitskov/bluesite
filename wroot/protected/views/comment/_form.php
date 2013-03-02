@@ -1,29 +1,45 @@
 <div class="form">
+     <?php  
+$submitJS = <<<EOS
+function submitAjax(form, data, hasError) {
+    if (!hasError){
+        // No errors! Do your post and stuff
+        $.post(form.attr('action'), form.serialize(), function(res){
+            // Do stuff with your response data!
+            if (res.body) {
+               var l = $('#comments .comment').length;
+               if (l == 0) {
+                  $('#nocomments').hide();
+                  $('#onecomment').show();
+                  $('#ncomments .numx').text(1 + $('#ncomments .numx'));
+               } else if (l == 1) {
+                  $('#onecomment').hide();
+                  $('#ncomments').show();
+                  $('#ncomments .numx').text(1 + $('#ncomments .numx'));
+               } 
+               var newComs = $(res.body);
+               hookCommentHandlers(newComs);
+               $('.comment-bodies').append(newComs);
+               $('#Comment_content').val('');
+            }
+        });
+    }
+    // Always return false so that Yii will never do a traditional form submit
+    return false;
+}
+EOS
+;
 
+Yii::app()->getClientScript()->registerScript('submitComment', $submitJS);
+?>
+     
 <?php $form=$this->beginWidget('CActiveForm', array(
-	'id'=>'comment-form',
+	'id'=>'comment-form',    
+    'action' => array('comment/add'),
+    'clientOptions' => array('validateOnSubmit' => true,
+                             'afterValidate' => 'js:submitAjax'),
 	'enableAjaxValidation'=>true,
 )); ?>
-
-	<p class="note">Fields with <span class="required">*</span> are required.</p>
-
-	<div class="row">
-		<?php echo $form->labelEx($model,'author'); ?>
-		<?php echo $form->textField($model,'author',array('size'=>60,'maxlength'=>128)); ?>
-		<?php echo $form->error($model,'author'); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->labelEx($model,'email'); ?>
-		<?php echo $form->textField($model,'email',array('size'=>60,'maxlength'=>128)); ?>
-		<?php echo $form->error($model,'email'); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->labelEx($model,'url'); ?>
-		<?php echo $form->textField($model,'url',array('size'=>60,'maxlength'=>128)); ?>
-		<?php echo $form->error($model,'url'); ?>
-	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'content'); ?>
@@ -31,6 +47,8 @@
 		<?php echo $form->error($model,'content'); ?>
 	</div>
 
+    <?php echo $form->hiddenField($model,'obj_id'); ?>
+    <?php echo $form->hiddenField($model,'obj_type'); ?>
 	<div class="row buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? 'Submit' : 'Save'); ?>
 	</div>
@@ -38,3 +56,4 @@
 <?php $this->endWidget(); ?>
 
 </div><!-- form -->
+

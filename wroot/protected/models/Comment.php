@@ -1,20 +1,31 @@
 <?php
 
+/**
+ *  Entity comment either project or a separate file.
+ */
 class Comment extends CActiveRecord
 {
 	/**
 	 * The followings are the available columns in table 'tbl_comment':
 	 * @var integer $id
-	 * @var string $content
-	 * @var integer $status
-	 * @var integer $create_time
-	 * @var string $author
-	 * @var string $email
-	 * @var string $url
-	 * @var integer $post_id
+	 * @var string  $content        text of comment
+	 * @var string  $status         'ne' new, 'de' deleted by author, 'ok' validated by moderator
+	 * @var string  $obj_type       which object is commented 'pr' project or 'fl' file          
+	 * @var integer $created        unix time stamp
+	 * @var integer $author_id      profile id
+	 * @var integer $obj_id         commented object id (project or file)
 	 */
-	const STATUS_PENDING=1;
-	const STATUS_APPROVED=2;
+    // possible comment statuses
+	const ST_NEW = 'ne';     // not checked yet by moderator
+	const ST_DELETED = 'de'; // deleted by the author
+    const ST_VALID = 'ok' ;  // passed moderator validation
+    const ST_BANNED = 'bn';  // moderator treated it as violating site rules.
+    const ST_CHANGED = 'ch'; // comment was changed after moderator review
+
+    // possible object types
+    const OT_PROJECT = 'pr';
+    const OT_FILE    = 'fl';
+
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -41,10 +52,10 @@ class Comment extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('content, author, email', 'required'),
-			array('author, email, url', 'length', 'max'=>128),
-			array('email','email'),
-			array('url','url'),
+			array('content, author_id, created, obj_type, obj_id, status', 'required'),
+			array('status', 'in', 'range'=> array(self::ST_NEW,self::ST_DELETED,
+                    self::ST_VALID, self::ST_BANNED, self::ST_CHANGED)),
+			array('obj_type','in', 'range' => array(self::OT_FILE, self::OT_PROJECT))
 		);
 	}
 
@@ -56,7 +67,7 @@ class Comment extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'post' => array(self::BELONGS_TO, 'Post', 'post_id'),
+			'author' => array(self::BELONGS_TO, 'User', 'author_id'),
 		);
 	}
 
@@ -69,80 +80,13 @@ class Comment extends CActiveRecord
 			'id' => 'Id',
 			'content' => 'Comment',
 			'status' => 'Status',
-			'create_time' => 'Create Time',
-			'author' => 'Name',
-			'email' => 'Email',
-			'url' => 'Website',
-			'post_id' => 'Post',
+			'created' => 'Create Time',
+			'author_id' => 'Name',
+			'obj_type' => 'Type',
 		);
 	}
 
-	/**
-	 * Approves a comment.
-	 */
-	public function approve()
-	{
-		$this->status=Comment::STATUS_APPROVED;
-		$this->update(array('status'));
-	}
-
-	/**
-	 * @param Post the post that this comment belongs to. If null, the method
-	 * will query for the post.
-	 * @return string the permalink URL for this comment
-	 */
-	public function getUrl($post=null)
-	{
-		if($post===null)
-			$post=$this->post;
-		return $post->url.'#c'.$this->id;
-	}
-
-	/**
-	 * @return string the hyperlink display for the current comment's author
-	 */
-	public function getAuthorLink()
-	{
-		if(!empty($this->url))
-			return CHtml::link(CHtml::encode($this->author),$this->url);
-		else
-			return CHtml::encode($this->author);
-	}
-
-	/**
-	 * @return integer the number of comments that are pending approval
-	 */
-	public function getPendingCommentCount()
-	{
-		return $this->count('status='.self::STATUS_PENDING);
-	}
-
-	/**
-	 * @param integer the maximum number of comments that should be returned
-	 * @return array the most recently added comments
-	 */
-	public function findRecentComments($limit=10)
-	{
-		return $this->with('post')->findAll(array(
-			'condition'=>'t.status='.self::STATUS_APPROVED,
-			'order'=>'t.create_time DESC',
-			'limit'=>$limit,
-		));
-	}
-
-	/**
-	 * This is invoked before the record is saved.
-	 * @return boolean whether the record should be saved.
-	 */
-	protected function beforeSave()
-	{
-		if(parent::beforeSave())
-		{
-			if($this->isNewRecord)
-				$this->create_time=time();
-			return true;
-		}
-		else
-			return false;
-	}
+    public function canDelete($user) {
+        return $this->author_id == $user->id;
+    }
 }

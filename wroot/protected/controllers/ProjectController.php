@@ -32,7 +32,8 @@ class ProjectController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated users to access all actions
-                'actions' => array('myProjects', 'create', 'update', 'delete', 'follow', 'forget'),
+                'actions' => array('myProjects', 'create', 'update', 'delete',
+                    'follow', 'forget'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -70,9 +71,12 @@ class ProjectController extends Controller
 	public function actionView()
 	{
 		$project=$this->loadModel();
-
+        $newComment = new Comment;
+        $newComment->obj_type = Comment::OT_PROJECT;
+        $newComment->obj_id = $project->id;
 		$this->render('view',array(
 			'model'=>$project,
+            'newComment' => $newComment
 		));
 	}
 
@@ -89,6 +93,7 @@ class ProjectController extends Controller
             $model->owner_id = Yii::app()->user->id;
             $model->status   = Project::NEWPRO;
             $model->created  = time();
+            $model->ncomments = 0;
 			if($model->save()) {
 				$this->redirect(array('view','id'=>$model->id));
             }
@@ -106,8 +111,7 @@ class ProjectController extends Controller
 	public function actionUpdate()
 	{
 		$model=$this->loadModel();
-		if(isset($_POST['Project']))
-		{
+		if (isset($_POST['Project'])) {
 			$model->attributes=$_POST['Project'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
@@ -224,4 +228,5 @@ class ProjectController extends Controller
 		}
 		return $this->_model;
 	}
+
 }

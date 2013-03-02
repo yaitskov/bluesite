@@ -20,4 +20,17 @@ class Controller extends CController
 	 * for more details on how to specify this property.
 	 */
 	public $breadcrumbs=array();
+
+    protected function renderJson($data)
+    {
+        header('Content-type: application/json');
+        echo CJSON::encode($data);
+
+        foreach (Yii::app()->log->routes as $route) {
+            if($route instanceof CWebLogRoute) {
+                $route->enabled = false; // disable any weblogroutes
+            }
+        }
+        Yii::app()->end();
+    }
 }

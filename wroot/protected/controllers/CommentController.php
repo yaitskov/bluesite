@@ -36,6 +36,27 @@ class CommentController extends Controller
 		);
 	}
 
+    public function actionAdd() {
+        $comment = new Comment;
+        if (isset($_POST['ajax'])) {
+            $this->renderJson(array()); // nothing always ok
+        }        
+        if (isset($_POST['Comment'])) {
+            $comment->attributes = $_POST['Comment'];
+            $comment->created = time();
+            $comment->status = Comment::ST_NEW;
+            $comment->author_id = Yii::app()->user->id;
+            if ($comment->save()) {
+                $this->renderJson(
+                    array(
+                        'body' => $this->renderPartial('_view', array('data' => $comment), true),
+                    ));
+            }
+            $this->renderJson(array('error' => "validation errors", 'causes' => $comment->errors));
+        }
+        $this->renderJson(array('error' => "no data"));
+    }
+
 	/**
 	 * Updates a particular model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
@@ -66,50 +87,19 @@ class CommentController extends Controller
 	 */
 	public function actionDelete()
 	{
-		if(Yii::app()->request->isPostRequest)
-		{
-			// we only allow deletion via POST request
-			$this->loadModel()->delete();
-
-			// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-			if(!isset($_POST['ajax']))
-				$this->redirect(array('index'));
-		}
-		else
-			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-	}
-
-	/**
-	 * Lists all models.
-	 */
-	public function actionIndex()
-	{
-		$dataProvider=new CActiveDataProvider('Comment', array(
-			'criteria'=>array(
-				'with'=>'post',
-				'order'=>'t.status, t.create_time DESC',
-			),
-		));
-
-		$this->render('index',array(
-			'dataProvider'=>$dataProvider,
-		));
-	}
-
-	/**
-	 * Approves a particular comment.
-	 * If approval is successful, the browser will be redirected to the comment index page.
-	 */
-	public function actionApprove()
-	{
-		if(Yii::app()->request->isPostRequest)
-		{
-			$comment=$this->loadModel();
-			$comment->approve();
-			$this->redirect(array('index'));
-		}
-		else
-			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+        try {
+            $comment = $this->loadModel();
+            if (!$comment->canDelete(Yii::app()->user)) {
+                $this->renderJson(array('error' => 'You do not have enough permissions'));
+            }
+            if ($comment->delete()) {
+                $this->renderJson(array());
+            } else {
+                $this->renderJson(array('error' => 'cannot delete'));
+            }
+        } catch(CHttpException $e) {
+            $this->renderJson(array('error' => $e->getMessage()));
+        }
 	}
 
 	/**
