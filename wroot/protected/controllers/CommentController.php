@@ -82,8 +82,7 @@ class CommentController extends Controller
 	}
 
 	/**
-	 * Deletes a particular model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * Marks as deleted.
 	 */
 	public function actionDelete()
 	{
@@ -92,10 +91,14 @@ class CommentController extends Controller
             if (!$comment->canDelete(Yii::app()->user)) {
                 $this->renderJson(array('error' => 'You do not have enough permissions'));
             }
-            if ($comment->delete()) {
+            $comment->status = Comment::ST_DELETED;
+            if ($comment->save()) {
                 $this->renderJson(array());
             } else {
-                $this->renderJson(array('error' => 'cannot delete'));
+                $this->renderJson(
+                    array(
+                        'error' => 'cannot delete',
+                        'causes' => $comment->errors));
             }
         } catch(CHttpException $e) {
             $this->renderJson(array('error' => $e->getMessage()));
