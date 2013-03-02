@@ -1,4 +1,6 @@
 *.pem
 *.pub
+*.tar
+*.gz
 wroot/assets/*
 wroot/protected/runtime/*
