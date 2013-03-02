@@ -30,27 +30,52 @@ function confirmOperation(question, callback) {
     );
 }
 
+function fixCommentHeaderMore() {
+    var l = $('#comments .comment:visible').length;
+    if (l == 0) {
+        $('#nocomments').hide();
+        $('#onecomment').show();
+    } else if (l == 1) {
+        $('#onecomment').hide();
+        $('#ncomments').show();
+    }
+    $('#ncomments .numx').text(1 + parseInt($('#ncomments .numx').text()));    
+}
+
+function fixCommentHeaderLow() {
+    var l = $('#comments .comment:visible').length;
+    if (l == 1) {
+        $('#nocomments').show();
+        $('#onecomment').hide();
+    } else if (l == 2) {
+        $('#onecomment').show();
+        $('#ncomments').hide();
+    }    
+    $('#ncomments .numx').text(parseInt($('#ncomments .numx').text()) - 1);
+}
 
 function hookCommentHandlers(root) {
-    root.on('click','.time a.delete',
-            function (e) {
-                e.preventDefault();
-	        var th=$(this),
-		container=th.closest('div.comment'),
-		id=container.attr('id').slice(1);
-                confirmOperation(
-                    'Are you sure you want to delete comment #'+id+'?',
-                    function () {
-                        $.ajax({ url:th.attr('href') }).done(
-                            function (data) {
-                                if (data.error) {
-                                    showErrorMessage(data.error);
-                                } else {
-                                    container.slideUp();                                
-                                }
-                            });
-                    });
-            });
+    var newDels = root.find('a.delete');
+    newDels.click(
+        function (e) {
+            e.preventDefault();
+	    var th = $(this),
+	    container = th.closest('div.comment'),
+	    id=container.attr('id').slice(1);
+            confirmOperation(
+                'Are you sure you want to delete comment #'+id+'?',
+                function () {
+                    $.ajax({ url:th.attr('href') }).done(
+                        function (data) {
+                            if (data.error) {
+                                showErrorMessage(data.error);
+                            } else {
+                                fixCommentHeaderLow();
+                                container.slideUp();                                
+                            }
+                        });
+                });
+        });
 }
 
 

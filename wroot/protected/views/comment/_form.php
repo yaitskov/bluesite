@@ -7,16 +7,7 @@ function submitAjax(form, data, hasError) {
         $.post(form.attr('action'), form.serialize(), function(res){
             // Do stuff with your response data!
             if (res.body) {
-               var l = $('#comments .comment').length;
-               if (l == 0) {
-                  $('#nocomments').hide();
-                  $('#onecomment').show();
-                  $('#ncomments .numx').text(1 + $('#ncomments .numx'));
-               } else if (l == 1) {
-                  $('#onecomment').hide();
-                  $('#ncomments').show();
-                  $('#ncomments .numx').text(1 + $('#ncomments .numx'));
-               } 
+               fixCommentHeaderMore();
                var newComs = $(res.body);
                hookCommentHandlers(newComs);
                $('.comment-bodies').append(newComs);
