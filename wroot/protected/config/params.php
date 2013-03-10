@@ -2,6 +2,12 @@
 
 // this contains the application parameters that can be maintained via GUI
 return array(
+    // max uploadable file size in bytes
+    'max-uploadable-file' => 250000,
+    // path to git control version system
+    'gitpath' => '/usr/bin/git',
+    // project repositories path
+    'project-repos-path' => '/tmp/project-repos-path',
     // git branch to pull
     'pull-branch' => 'master',
     // git remote repository to pull

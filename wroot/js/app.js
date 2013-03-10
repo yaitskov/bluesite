@@ -78,6 +78,32 @@ function hookCommentHandlers(root) {
         });
 }
 
+function uploadFileDialog(requestUrl) {
+    $.ajax({ url: requestUrl }).done(
+        function (data) {
+            if (data.error) {
+                showErrorMessage(data.error);
+            } else { // got form
+                var form = $(data.body);
+                form.submit(
+                    function (e) {                        
+                        return false;
+                    });
+                form.find('.upload-button').click(
+                    function () {
+                        form.submit();
+                    }
+                );
+                form.find('.cancel-upload').click(
+                    function () {
+                        form.remove();                        
+                    }
+                );
+                $('#errbox').append(form);                
+            }
+        });    
+}
+
 
 
 

@@ -293,3 +293,8 @@ div.breadcrumbs span
     font-size: 13pt;
     padding: 11px;
 }
+
+#upload-form textarea {
+    width: 664px;
+    height: 145px;
+}

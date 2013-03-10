@@ -95,7 +95,13 @@ class ProjectController extends Controller
             $model->created  = time();
             $model->ncomments = 0;
 			if($model->save()) {
-				$this->redirect(array('view','id'=>$model->id));
+                try {
+                    Yii::app()->repo->create($model->id);                
+                    $this->redirect(array('view','id'=>$model->id));
+                } catch (Exception $e) {
+                    $model->delete();
+                    $model->addError('system', "Failed to create repository folder");                    
+                }                            
             }
 		}
 

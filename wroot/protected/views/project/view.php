@@ -25,10 +25,28 @@ $this->pageTitle=$model->prname;
 				array('label'=>'Drop',
                     'visible' => $model->canChange(Yii::app()->user->id),                    
                     'url'=> array('project/delete', 'id' => $model->id)),                
+				array('label'=>'Upload',
+                    'linkOptions' => array('id' => 'upload-file'),
+                    'visible' => $model->canChange(Yii::app()->user->id),
+                    'url'=> array('fileModel/upload', 'project_id' => $model->id)),                
             ))); ?>
-
 </div>
 <?php endif; ?>
+<?php
+/**
+if($model->canChange(Yii::app()->user->id)) {
+$hookUpload = <<<EOS
+$('#upload-file').click(function (e) {
+ e.preventDefault();
+ uploadFileDialog($(this).attr('href'));
+});
+EOS
+;
+
+Yii::app()->getClientScript()->registerScript('hookUpload', $hookUpload);
+}
+*/
+?>
 
 
 <h1>Project <?php echo CHtml::encode($model->prname); ?></h1>

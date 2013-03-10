@@ -23,6 +23,10 @@ return array(
 
 	// application components
 	'components'=>array(
+        'repo'=>array(
+            'class' => 'RepoStorage',
+            'path'  => $params['project-repos-path']
+        ),
 		'user'=>array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
